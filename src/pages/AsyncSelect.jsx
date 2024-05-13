@@ -4,7 +4,7 @@ import {SelectTime} from "../components/SelectTime";
 import {divideString, hours, minutes, seconds, sendGetRequest} from "../store/store";
 import axios from "axios";
 
-const SelectList = () => {
+const AsyncSelect = () => {
 
     const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState('');
@@ -119,7 +119,7 @@ const SelectList = () => {
         console.log(linkList)
         linkList.then(result => {
             const urlsArray = result.map(item => item);
-            const iframe = document.getElementById('iframeForLinks')
+            const iframe = document.getElementById('iframeForAsync')
             const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
 
             urlsArray.forEach(url => {
@@ -170,7 +170,7 @@ const SelectList = () => {
             <button onClick={clickBtnShowResult}> Начать загрузку данных </button>
             <button onClick={showLinks}> Вывести ссылки! </button>
             <iframe
-                id="iframeForLinks"
+                id="iframeForAsync"
                 width="500"
                 height="600"
                 >
@@ -179,4 +179,4 @@ const SelectList = () => {
     );
 };
 
-export default SelectList;
+export default AsyncSelect;

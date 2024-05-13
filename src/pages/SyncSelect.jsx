@@ -3,7 +3,7 @@ import axios from "axios";
 import {SelectService} from "../components/SelectService";
 import {divideString} from "../store/store";
 
-export const SecondPage = () => {
+export const SyncSelect = () => {
     const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState('');
     const [stations, setStations] = useState([]);
@@ -66,7 +66,7 @@ export const SecondPage = () => {
 
     const ShowResult = () => {
         if (linkList.length > 0) {
-            const iframe = document.getElementById('iframeForLinks2');
+            const iframe = document.getElementById('iframeForSync');
             const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
             iframeDocument.body.innerHTML = `<a href="${linkList}">${linkList}</a>`;
 
@@ -91,17 +91,25 @@ export const SecondPage = () => {
 
         let firstDayValue = document.getElementById('firstDay').value;
         let firstMonthValue = document.getElementById('firstMonth').value;
+        let firstHourValue = document.getElementById('firstHour').value;
+        let firstMinValue = document.getElementById('firstMinute').value;
+        let firstSecValue = document.getElementById('firstSec').value;
         let secondDayValue = document.getElementById('secondDay').value;
         let secondMonthValue = document.getElementById('secondMonth').value;
+        let secondHourValue = document.getElementById('secondHour').value;
+        let secondMinValue = document.getElementById('secondMinute').value;
+        let secondSecValue = document.getElementById('secondSec').value;
         if (!firstDayValue || !firstMonthValue || !secondDayValue || !secondMonthValue) {
             console.log("Введите все значения");
             console.log(firstDate)
             console.log(secondDate)
             return;
         } else {
-            const f = `2024-${firstMonthValue}-${firstDayValue}`
-            const s = `2024-${secondMonthValue}-${secondDayValue}`;
-
+            const f = `2024-${firstMonthValue}-${firstDayValue}T${firstHourValue}:${firstMinValue}:${firstSecValue}`
+            const s = `2024-${secondMonthValue}-${secondDayValue}T${secondHourValue}:${secondMinValue}:${secondSecValue}`;
+            console.log(firstHourValue, firstMinValue,  firstSecValue)
+            console.log(f)
+            console.log(s)
             const {network, station} =  divideString(selectedStations)
             const response = await axios.post(`https://geoscope-vniia.ru/api/v1/sync_loader`, {
                 'service_name': `${selectedService}`,
@@ -140,13 +148,19 @@ export const SecondPage = () => {
     return (
         <div>
 
-            <div>Асинхронные запросы рассчитаны только на 2024 год.</div>
-            <div>Введите дату от 01.01 с которой начинается получение данных. </div>
+            <div>Синхронные запросы рассчитаны только на 2024 год.</div>
+            <div>Введите дату и время от 01.01 с которой начинается получение данных. </div>
             <input type="text" id="firstDay" name="" placeholder="Введите день" pattern=""/>
             <input type="text" id="firstMonth" name="" placeholder="Введите месяц" pattern=""/>
-            <div>Введите дату до {today} с которой начинается получение данных. </div>
+            <input type="text" id="firstHour" name="" placeholder="Введите час" pattern=""/>
+            <input type="text" id="firstMinute" name="" placeholder="Введите минуту" pattern=""/>
+            <input type="text" id="firstSec" name="" placeholder="Введите секунду" pattern=""/>
+            <div>Введите дату и время до {today} с которой начинается получение данных. </div>
             <input type="text" id="secondDay" name="" placeholder="Введите день" pattern=""/>
             <input type="text" id="secondMonth" name="" placeholder="Введите месяц" pattern=""/>
+            <input type="text" id="secondHour" name="" placeholder="Введите час" pattern=""/>
+            <input type="text" id="secondMinute" name="" placeholder="Введите минуту" pattern=""/>
+            <input type="text" id="secondSec" name="" placeholder="Введите секунду" pattern=""/>
             <SelectService onChange={(e) => setSelectedService(e.target.value)}
                            services={services}
                            selectedService={selectedService}
@@ -167,10 +181,12 @@ export const SecondPage = () => {
             <br/>
             <button onClick={sendReq}>Получить данные</button>
 
-
+            {/*Временные ворота задавать (не просто день, но и время,
+            пример: 2010-02-27T06:30:00, где 2010 - год, 02- месяц, 27 - число,
+             06 - час, 30 - минуты, 00 - секунды, время задается в UTC)*/}
             <div>
                 <iframe
-                    id="iframeForLinks2"
+                    id="iframeForSync"
                     width="400"
                     height="100"
                 >

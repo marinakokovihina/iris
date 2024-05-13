@@ -1,7 +1,7 @@
-import React, {useState, useTransition} from 'react';
+import React from 'react';
 import styled from "styled-components";
-import SelectList from "./SelectList";
-import {SecondPage} from "./SecondPage";
+import AsyncSelect from "./AsyncSelect";
+import {SyncSelect} from "./SyncSelect";
 
 export const MainPage = () => {
 
@@ -10,8 +10,8 @@ export const MainPage = () => {
     return (
         <MainWrapper>
 
-            <SelectList/>
-           <SecondPage/>
+            <AsyncSelect/>
+            <SyncSelect/>
 
         </MainWrapper>
     );
