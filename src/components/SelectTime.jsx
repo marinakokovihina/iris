@@ -1,29 +1,30 @@
 import React from 'react';
+import {SelectTimeDivStyled, SelectTimeStyled} from "./styles/StyledAsync";
 
 export const SelectTime = ({selectedHour, handleHourChange, hours, selectedMinute, handleMinuteChange, minutes, selectedSecond, handleSecondChange, seconds}) => {
     return (
-        <div>
-            <select value={selectedHour} onChange={handleHourChange}>
+        <SelectTimeDivStyled>
+            <SelectTimeStyled value={selectedHour} onChange={handleHourChange}>
                 {hours.map(hour => (
                     <option key={hour} value={hour}>{hour}</option>
                 ))}
-            </select>
+            </SelectTimeStyled>
             <span> : </span>
-            <select value={selectedMinute} onChange={handleMinuteChange}>
+            <SelectTimeStyled value={selectedMinute} onChange={handleMinuteChange}>
                 {minutes.map(minute => (
                     <option key={minute} value={minute}>{minute}</option>
                 ))}
-            </select>
+            </SelectTimeStyled>
             <span> : </span>
 
-            <select value={selectedSecond} onChange={handleSecondChange}>
+            <SelectTimeStyled value={selectedSecond} onChange={handleSecondChange}>
                 {
                     seconds.map(second => (
                         <option key={second} value={second}>{second}</option>
                     ))
                 }
-            </select>
-        </div>
+            </SelectTimeStyled>
+        </SelectTimeDivStyled>
     );
 };
 

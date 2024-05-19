@@ -2,22 +2,24 @@ import React from 'react';
 import {StyledFormLogin, StyledLoginPage, StyledWrapLogin} from "../components/styles/StyledLoginPage";
 import {useNavigate} from "react-router-dom";
 
-export const LoginPage = ({ onLogin }) => {
+// export const LoginPage = ({ onLogin }) => {
+export const LoginPage = () => {
+
     const navigate = useNavigate();
 
-    const loginButton = () => {
-        const login = document.getElementById('loginInput').value;
-        const password = document.getElementById('passwordInput').value;
-
-
-        if (login === "admin" && password === "admin") {
-            onLogin();
-            navigate('/vkr')
-
-        } else {
-            alert('Неправильный пароль :с')
-        }
-    }
+    // const loginButton = () => {
+    //     const login = document.getElementById('loginInput').value;
+    //     const password = document.getElementById('passwordInput').value;
+    //
+    //
+    //     if (login === "admin" && password === "admin") {
+    //         onLogin();
+    //         navigate('/vkr')
+    //
+    //     } else {
+    //         alert('Неправильный пароль :с')
+    //     }
+    // }
     return (
         <StyledLoginPage>
             <StyledWrapLogin>
@@ -32,7 +34,7 @@ export const LoginPage = ({ onLogin }) => {
                     <input type={"password"}
                            placeholder={"Введите пароль"}
                            id={"passwordInput"}/>
-                    <button onClick={loginButton}> Войти в аккаунт! </button>
+                    {/*<button onClick={loginButton}> Войти в аккаунт! </button>*/}
                 </StyledFormLogin>
             </StyledWrapLogin>
         </StyledLoginPage>

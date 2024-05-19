@@ -2,6 +2,21 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {SelectService} from "../components/SelectService";
 import {divideString} from "../store/store";
+import {
+    imgContainerStyled,
+    StyledDataTimeInput,
+    StyledH1Sync,
+    StyledIframeSync,
+    StyledInputSync, StyledResultSync,
+    StyledSyncForm,
+    StyledSyncMain
+} from "../components/styles/StyledSync";
+import {
+    StyledButtonAsync,
+    StyledButtonAsyncBigger,
+    StyledSelectService,
+    StyledTextSync
+} from "../components/styles/StyledAsync";
 
 export const SyncSelect = () => {
     const [services, setServices] = useState([]);
@@ -49,7 +64,7 @@ export const SyncSelect = () => {
                     }
                 });
 
-                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap }));
+                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap,  hasDist: item.has_supported_dist }));
                 const filteredServ = serv.filter(item => item.hasSup === true);
                 console.log(filteredServ);
                 setServices(filteredServ)
@@ -84,39 +99,66 @@ export const SyncSelect = () => {
             }
 
             img.src = `data:image/jpeg;base64,${pict}`;
+            img.width="400";
+            img.height="400";
+
         }
     };
 
     const sendReq = async() => {
 
-        let firstDayValue = document.getElementById('firstDay').value;
-        let firstMonthValue = document.getElementById('firstMonth').value;
-        let firstHourValue = document.getElementById('firstHour').value;
-        let firstMinValue = document.getElementById('firstMinute').value;
-        let firstSecValue = document.getElementById('firstSec').value;
-        let secondDayValue = document.getElementById('secondDay').value;
-        let secondMonthValue = document.getElementById('secondMonth').value;
-        let secondHourValue = document.getElementById('secondHour').value;
-        let secondMinValue = document.getElementById('secondMinute').value;
-        let secondSecValue = document.getElementById('secondSec').value;
-        if (!firstDayValue || !firstMonthValue || !secondDayValue || !secondMonthValue) {
-            console.log("Введите все значения");
+        const startDateInput = document.getElementById("startDate");
+        if (!startDateInput) return;
+
+        const startDate = new Date(startDateInput.value);
+
+        const firstDayValue = startDate.getDate();
+        const firstMonthValue = '0'+(startDate.getMonth() + 1);
+        const firstHourValue = startDate.getHours();
+        const firstMinValue = startDate.getMinutes();
+        const firstSecValue = '01';
+        console.log("Day: ", firstDayValue);
+        console.log("Month: ", firstMonthValue);
+        console.log("Hour: ", firstHourValue);
+        console.log("Minute: ", firstMinValue);
+        const endDateInput = document.getElementById("endDate");
+        if (!endDateInput) return;
+
+        const endDate = new Date(endDateInput.value);
+
+        const secondDayValue = endDate.getDate();
+        const secondMonthValue = '0'+(endDate.getMonth() + 1);
+        const secondHourValue = endDate.getHours();
+        const secondMinValue = endDate.getMinutes();
+        const secondSecValue = '01';
+        console.log("Day: ", secondDayValue);
+        console.log("Month: ", secondMonthValue);
+        console.log("Hour: ", secondHourValue);
+        console.log("Minute: ", secondMinValue);
+        // let firstDayValue = document.getElementById('firstDay').value;
+        // let firstMonthValue = document.getElementById('firstMonth').value;
+        // let firstHourValue = document.getElementById('firstHour').value;
+        // let firstMinValue = document.getElementById('firstMinute').value;
+        // let firstSecValue = '01'
+
+        if (!firstDayValue || !firstMonthValue || !secondDayValue || !secondMonthValue  || !firstMinValue || !firstSecValue  || !secondMinValue || !secondSecValue) {
+            alert("Введите все значения");
             console.log(firstDate)
             console.log(secondDate)
             return;
         } else {
-            const f = `2024-${firstMonthValue}-${firstDayValue}T${firstHourValue}:${firstMinValue}:${firstSecValue}`
-            const s = `2024-${secondMonthValue}-${secondDayValue}T${secondHourValue}:${secondMinValue}:${secondSecValue}`;
+            const leftTime = `2024-${firstMonthValue}-${firstDayValue}T${firstHourValue}:${firstMinValue}:${firstSecValue}`
+            const rightTime = `2024-${secondMonthValue}-${secondDayValue}T${secondHourValue}:${secondMinValue}:${secondSecValue}`;
             console.log(firstHourValue, firstMinValue,  firstSecValue)
-            console.log(f)
-            console.log(s)
+            console.log(leftTime)
+            console.log(rightTime)
             const {network, station} =  divideString(selectedStations)
             const response = await axios.post(`https://geoscope-vniia.ru/api/v1/sync_loader`, {
                 'service_name': `${selectedService}`,
                 'network': `${network}`,
                 'station': `${station}`,
-                'left_time': `${f}`,
-                'right_time': `${s}`
+                'left_time': `${leftTime}`,
+                'right_time': `${rightTime}`
             }, {
                 headers: {
                     'ngrok-skip-browser-warning': '69420',
@@ -145,30 +187,76 @@ export const SyncSelect = () => {
     let day = today.getDate();
     let month = today.getMonth() + 1;
     today = `${day}.0${month}`
+    useEffect(() => {
+        if (selectedService) {
+            clickBtnShowStations();
+        }
+    }, [selectedService]);
     return (
-        <div>
+        <StyledSyncMain>
 
-            <div>Синхронные запросы рассчитаны только на 2024 год.</div>
-            <div>Введите дату и время от 01.01 с которой начинается получение данных. </div>
-            <input type="text" id="firstDay" name="" placeholder="Введите день" pattern=""/>
-            <input type="text" id="firstMonth" name="" placeholder="Введите месяц" pattern=""/>
-            <input type="text" id="firstHour" name="" placeholder="Введите час" pattern=""/>
-            <input type="text" id="firstMinute" name="" placeholder="Введите минуту" pattern=""/>
-            <input type="text" id="firstSec" name="" placeholder="Введите секунду" pattern=""/>
-            <div>Введите дату и время до {today} с которой начинается получение данных. </div>
-            <input type="text" id="secondDay" name="" placeholder="Введите день" pattern=""/>
-            <input type="text" id="secondMonth" name="" placeholder="Введите месяц" pattern=""/>
-            <input type="text" id="secondHour" name="" placeholder="Введите час" pattern=""/>
-            <input type="text" id="secondMinute" name="" placeholder="Введите минуту" pattern=""/>
-            <input type="text" id="secondSec" name="" placeholder="Введите секунду" pattern=""/>
+            <StyledH1Sync> Интервал времени </StyledH1Sync>
+
+
+            <StyledDataTimeInput
+                type={"datetime-local"}
+                id="startDate"
+                name="startDate"
+                onChange={() => {
+                    const startDateInput = document.getElementById("startDate");
+                    const startDate = new Date(startDateInput.value);
+
+                    const selectedDay = startDate.getDate();
+                    const selectedMonth = startDate.getMonth() + 1;
+                    const selectedYear = startDate.getFullYear();
+                    const selectedHour = startDate.getHours();
+                    const selectedMinute = startDate.getMinutes();
+
+                    console.log("Day: ", selectedDay);
+                    console.log("Month: ", selectedMonth);
+                    console.log("Year: ", selectedYear);
+                    console.log("Hour: ", selectedHour);
+                    console.log("Minute: ", selectedMinute);
+
+                    // const startDate = new Date(e.target.value);
+                    // const firstDay = document.getElementById("firstDay");
+                    // const firstMonth = document.getElementById("firstMonth");
+                    // const firstHour = document.getElementById("firstHour");
+                    // const firstMinute = document.getElementById("firstMinute");
+                    //
+                    // if (firstDay) firstDay.value = startDate.getDate();
+                    // if (firstMonth) firstMonth.value = startDate.getMonth() + 1;
+                    // if (firstHour) firstHour.value = startDate.getHours();
+                    // if (firstMinute) firstMinute.value = startDate.getMinutes();
+                    // console.log(firstDay,firstMonth, firstHour, firstMinute )
+                }}
+            />
+            <StyledDataTimeInput
+                type={"datetime-local"}
+                id="endDate"
+                name="endDate"
+                onChange={(e) => {
+
+                    // const endDate = new Date(e.target.value);
+                    // const secondDay = document.getElementById("secondDay");
+                    // const secondMonth = document.getElementById("secondMonth");
+                    // const secondHour = document.getElementById("secondHour");
+                    // const secondMinute = document.getElementById("secondMinute");
+                    //
+                    // if (secondDay) secondDay.value = endDate.getDate();
+                    // if (secondMonth) secondMonth.value = endDate.getMonth() + 1;
+                    // if (secondHour) secondHour.value = endDate.getHours();
+                    // if (secondMinute) secondMinute.value = endDate.getMinutes();
+                    // console.log(secondDay, secondMonth, secondHour, secondMinute)
+                }}
+            />
+
             <SelectService onChange={(e) => setSelectedService(e.target.value)}
                            services={services}
                            selectedService={selectedService}
             />
-            <button onClick={clickBtnShowStations}>Показать станции</button>
 
-            {showStations && (
-                <select
+                <StyledSelectService
                     value={selectedStations}
                     onChange={(e) => setSelectedStations(e.target.value)}
                 >
@@ -176,27 +264,25 @@ export const SyncSelect = () => {
                     {stations.map((station, index) => (
                         <option key={index} value={station}>{station}</option>
                     ))}
-                </select>
-            )}
+                </StyledSelectService>
             <br/>
-            <button onClick={sendReq}>Получить данные</button>
+            <StyledButtonAsyncBigger onClick={sendReq}>Получить данные</StyledButtonAsyncBigger>
 
             {/*Временные ворота задавать (не просто день, но и время,
             пример: 2010-02-27T06:30:00, где 2010 - год, 02- месяц, 27 - число,
              06 - час, 30 - минуты, 00 - секунды, время задается в UTC)*/}
-            <div>
-                <iframe
+            <StyledResultSync>
+                <imgContainerStyled id="imgContainer">
+
+                </imgContainerStyled>
+                <StyledIframeSync
                     id="iframeForSync"
                     width="400"
-                    height="100"
+                    height="60"
                 >
-                </iframe>
-
-                <div id="imgContainer">
-
-                </div>
-            </div>
-        </div>
+                </StyledIframeSync>
+            </StyledResultSync>
+        </StyledSyncMain>
     );
 };
 

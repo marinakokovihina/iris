@@ -1,17 +1,17 @@
 import React, {useEffect, useState} from 'react';
+import {StyledSelectService} from "./styles/StyledAsync";
 
 export const SelectService = ({services, selectedService,onChange}) => {
 
 
     return (
-        <div>
-            <select value={selectedService} onChange={onChange}>
-                <option value="">Выберите службу</option>
+            <StyledSelectService value={selectedService} onChange={onChange} id="testSelect">
+                <option disabled value="">Выберите службу</option>
                 {services.map((service) => (
                     <option key={service.id} value={service.name}>{service.name}</option>
                 ))}
-            </select>
-        </div>
+            </StyledSelectService>
+
     );
 };
 

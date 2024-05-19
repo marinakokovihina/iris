@@ -3,6 +3,13 @@ import {SelectService} from "../components/SelectService";
 import {SelectTime} from "../components/SelectTime";
 import {divideString, hours, minutes, seconds, sendGetRequest} from "../store/store";
 import axios from "axios";
+import {
+    AsyncH1, AsyncWrapper, StyledAsync, StyledButtonAsync, StyledButtonAsyncBigger,
+    StyledButtonSync, StyledIframe,
+    StyledSelectService,
+    StyledSync, StyledSyncSelectServices, StyledTable,
+    StyledTextSync, StyledTimerAsync, StyledTimerAsyncContainer
+} from "../components/styles/StyledAsync";
 
 const AsyncSelect = () => {
 
@@ -13,8 +20,6 @@ const AsyncSelect = () => {
     const [selectedSecond, setSelectedSecond] = useState('');
     const [selectedMinute, setSelectedMinute] = useState('');
     const [selectedHour, setSelectedHour] = useState('');
-    const [showStations, setShowStations] = useState(false);
-    const [linkList, setLinkList] = useState([]);
 
     const handleHourChange = (event) => {
         setSelectedHour(event.target.value);
@@ -37,7 +42,7 @@ const AsyncSelect = () => {
 
                 console.log(response.data);
 
-                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap }));
+                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap, hasDist: item.has_supported_dist }));
                 setServices(serv);
             } catch (error) {
                 console.error('Произошла ошибка запроса:', error);
@@ -50,9 +55,6 @@ const AsyncSelect = () => {
     const clickBtnShowStations = async () => {
         try {
             console.log(selectedService)
-            if (selectedService==0) {
-                alert('Выберите службу!  А то я Вам ничего не покажу!')
-            }
             const response = await axios.get(`https://geoscope-vniia.ru/api/v1/streams?service_name=${selectedService}`,
              {
                 headers: {
@@ -60,14 +62,11 @@ const AsyncSelect = () => {
                     'Content-Type': 'application/json'
                 },
             });
-            console.log(response);
-            console.log(response.data + "response data");
             const stationList = await Promise.all(response.data.data.map(async (item) => {
                 return `${item.network}/${item.station}`;
             }));
             console.log(stationList)
             setStations(stationList);
-            setShowStations(true);
             setStations(stationList)
             console.log(stations)
         } catch (error) {
@@ -79,103 +78,151 @@ const AsyncSelect = () => {
 
 
     const clickBtnShowResult = async() => {
-        const hourNum = Number(selectedHour)
-        const minuteIntNum = Number(selectedMinute)
-        const secondNum = Number(selectedSecond)
-        const timeToRequest = Number((hourNum*3600) + (minuteIntNum*60) + secondNum);
-        console.log(timeToRequest)
-        console.log(typeof(selectedStations))
+        const hourNum = Number(selectedHour);
+        const minuteIntNum = Number(selectedMinute);
+        const secondNum = Number(selectedSecond);
+        const timeToRequest = Number((hourNum * 3600) + (minuteIntNum * 60) + secondNum);
 
         try {
-            if (timeToRequest == []) {
-                alert('Выберите время! А то я Вам ничего не покажу!')
+            if (timeToRequest === 0 || isNaN(timeToRequest)) {
+                alert('Выберите время! А то я Вам ничего не покажу!');
             } else {
-                const {network, station} = divideString(selectedStations)
-                console.log(network, station)
+                const { network, station } = divideString(selectedStations);
                 const response = await axios.post(`https://geoscope-vniia.ru/api/v1/async_loader`, {
-                    'service_name': `${selectedService}`,
-                    'network': `${network}`,
-                    'station': `${station}`,
-                    'interval_sec': `${timeToRequest}`
-                })
-                console.log("response");
-                console.log(response);
-                console.log(response.data + "response data");
+                    'service_name': selectedService,
+                    'network': network,
+                    'station': station,
+                    'interval_sec': timeToRequest
+                });
                 const taskID = response.data.data.task_id;
-                console.log(taskID)
 
-                setLinkList(sendGetRequest(taskID, timeToRequest));
-                console.log('ссылки ссылки')
-                console.log(linkList )
+
+                const linkList = await sendGetRequest(taskID, timeToRequest);
+
+                console.log('Cсылки ', linkList);
             }
+        } catch (error) {
+            console.error('Ошибка:', error);
         }
-        catch (error) {
-            console.error('Ошибка ошибка ошибка аааааааа аааа аа а а!!!!:', error);
-        }
-
     };
 
-    const showLinks = () => {
-        console.log(linkList)
-        linkList.then(result => {
-            const urlsArray = result.map(item => item);
-            const iframe = document.getElementById('iframeForAsync')
-            const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+    async function sendGetRequest(taskId, timeToRequest) {
+        let responseValue = '';
+        let linkList = [];
 
-            urlsArray.forEach(url => {
-                const link = iframeDocument.createElement('a');
-                link.href = url;
-                link.textContent = url;
-                link.target = "_blank";
-                link.style.display = 'block';
-                iframeDocument.body.appendChild(link);
-            });
-            console.log(urlsArray);
-        });
+        while (responseValue !== 'finished') {
+            try {
+                const response = await axios.get(`https://geoscope-vniia.ru/api/v1/async_loader`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': '69420',
+                    },
+                    params: {
+                        'task_id': taskId,
+                    }
+                });
+                responseValue = response.data.data.status;
+                console.log(responseValue)
+                if (response.data.data.files) {
+                    linkList = linkList.concat(response.data.data.files);
+                }
+
+                if (responseValue === 'finished') {
+                    showLinks(linkList);
+                }
+            } catch (error) {
+                console.error('Произошла ошибка запроса:', error.message);
+            }
+            await new Promise((resolve) => setTimeout(resolve, timeToRequest * 1000 / 2));
+        }
+
+        console.log('Значение изменилось на "finished".');
+        return linkList;
+    }
+    useEffect(() => {
+        if (selectedService) {
+            clickBtnShowStations();
+        }
+    }, [selectedService]);
+    const showLinks = (linkList) => {
+
+        var table = document.getElementById('TableForLinks');
+        table.innerHTML = '';
+        var header = table.createTHead();
+        var row = header.insertRow(0);
+        var idCell = row.insertCell(0);
+        var linkCell = row.insertCell(1);
+        idCell.textContent = 'ID ссылки';
+        linkCell.textContent = 'Ссылка';
+        linkList.forEach((item, index) => {
+            var newRow = table.insertRow();
+            var newIdCell = newRow.insertCell(0);
+            var newLinkCell = newRow.insertCell(1);
+            newIdCell.textContent = index + 1; // Индекс + 1 как ID
+            newLinkCell.innerHTML = `<a href="${item}" target="_blank">${item}</a>`;});
+
 
     }
 
     return (
-        <div>
-            <SelectService onChange={(e) => setSelectedService(e.target.value)}
-                           services={services}
-                           selectedService={selectedService}
-            />
-
-            <button onClick={clickBtnShowStations}>Показать станции</button>
-
-            {showStations && (
-                <select
+        <StyledAsync>
+            <AsyncH1> Непрерывные данные </AsyncH1>
+            <StyledSyncSelectServices>
+                <SelectService onChange={(e) => {
+                    setSelectedService(e.target.value);
+                }}
+                               services={services}
+                               selectedService={selectedService}
+                />
+                <StyledSelectService
                     value={selectedStations}
-                    onChange={(e) => setSelectedStations(e.target.value)}
+                    onChange={(e) => {
+                        setSelectedStations(e.target.value)
+
+                    }}
                 >
-                    <option value="">Выберите станцию</option>
+                    <option disabled value="">Выберите станцию</option>
                     {stations.map((station, index) => (
                         <option key={index} value={station}>{station}</option>
                     ))}
-                </select>
-            )}
+                </StyledSelectService>
+            </StyledSyncSelectServices>
 
-            <SelectTime
-               selectedHour={selectedHour}
-               handleHourChange={handleHourChange}
-               hours={hours}
-               selectedMinute={selectedMinute}
-               handleMinuteChange={handleMinuteChange}
-               minutes={minutes}
-               selectedSecond={selectedSecond}
-               handleSecondChange={handleSecondChange}
-               seconds={seconds}
-           />
-            <button onClick={clickBtnShowResult}> Начать загрузку данных </button>
-            <button onClick={showLinks}> Вывести ссылки! </button>
-            <iframe
-                id="iframeForAsync"
-                width="500"
-                height="600"
-                >
-            </iframe>
-        </div>
+
+
+            <StyledTimerAsync>
+                <StyledTimerAsyncContainer>
+                    <div>Часов</div>
+                    <input placeholder="00h" type={"number"} onChange={handleHourChange} />
+                </StyledTimerAsyncContainer>
+                <StyledTimerAsyncContainer>
+                    <div>Минут</div>
+                    <input placeholder="00m" type={"number"} onChange={handleMinuteChange}/>
+                </StyledTimerAsyncContainer>
+                <StyledTimerAsyncContainer>
+                    <div>Секунд</div>
+                    <input placeholder="00s" type={"number"}  onChange={handleSecondChange} />
+                </StyledTimerAsyncContainer>
+            </StyledTimerAsync>
+            <StyledButtonAsyncBigger onClick={clickBtnShowResult}> Начать загрузку данных </StyledButtonAsyncBigger>
+
+            <StyledTable id="TableForLinks">
+                <thead>
+                <tr>
+                    <th>
+                        №
+                    </th>
+                    <th>
+                        Ссылка на скачивание
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr> <td></td><td> Данных нет </td> </tr>
+                </tbody>
+            </StyledTable>
+
+
+        </StyledAsync>
     );
 };
 
