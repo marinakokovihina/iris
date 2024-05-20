@@ -141,7 +141,7 @@ export const SyncSelect = () => {
         // let firstMinValue = document.getElementById('firstMinute').value;
         // let firstSecValue = '01'
 
-        if (!firstDayValue || !firstMonthValue || !secondDayValue || !secondMonthValue  || !firstMinValue || !firstSecValue  || !secondMinValue || !secondSecValue) {
+        if (!firstDayValue || !firstMonthValue || !secondDayValue || !secondMonthValue  || !firstSecValue   || !secondSecValue) {
             alert("Введите все значения");
             console.log(firstDate)
             console.log(secondDate)
