@@ -1,10 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {SelectService} from "../components/SelectService";
-import {StyledButtonAsyncBigger, StyledSelectService} from "../components/styles/StyledAsync";
+import {
+    PConnectionStyled,
+    StyledButtonAsyncBigger,
+    StyledGrayWrapper,
+    StyledSelectService
+} from "../components/styles/StyledAsync";
 import {divideString} from "../store/store";
 import {StyledDistanceDiv, StyledDistancePage, StyledInputDistance, StyledP} from "../components/styles/StyledDistance";
-import {StyledH1Sync} from "../components/styles/StyledSync";
+import {StyledDataTimeInput, StyledH1Sync} from "../components/styles/StyledSync";
 
 const GetDistance = () => {
     const [services, setServices] = useState([]);
@@ -14,9 +19,10 @@ const GetDistance = () => {
     const [latitude, setLatitude] = useState('');
     const [longitude, setLongitude] = useState('');
     const [showResult, setShowResult] = useState(false)
-    const [kilometrsDist, setKilometrsDist] = useState('Нет')
-    const [degreesDist, setDegreesDist] = useState('Нет')
-    const [iframeUrl, setIframeUrl] = useState('https://yandex.ru/map-widget/v1/')
+    const [kilometrsDist, setKilometrsDist] = useState('0')
+    const [degreesDist, setDegreesDist] = useState('0')
+    const [iframeUrl, setIframeUrl] = useState('https://yandex.ru/map-widget/v1/');
+
     useEffect(() => {
         const fetchServices = async () => {
             try {
@@ -28,9 +34,10 @@ const GetDistance = () => {
 
                 console.log(response.data);
 
-                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap, hasDist: item.has_supported_dist }));
+                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap, hasDist: item.has_supported_dist, host: item.connection.host, port: item.connection.port }));
                 const filteredServ = serv.filter(item => item.hasDist === true);
-
+                console.log(serv);
+                setServices(filteredServ)
                 setServices(filteredServ);
             } catch (error) {
                 console.error('Произошла ошибка запроса:', error);
@@ -114,37 +121,40 @@ const GetDistance = () => {
 
     return (
         <StyledDistancePage>
-            <StyledH1Sync> Получение дистанции  </StyledH1Sync>
-
-            <SelectService onChange={(e) => {
-                setSelectedService(e.target.value);
-            }}
-                           services={services}
-                           selectedService={selectedService}
-            />
-            <StyledSelectService
-                value={selectedStations}
-                onChange={(e) => {
-                    setSelectedStations(e.target.value)
-
+            <StyledGrayWrapper>
+                <StyledH1Sync> Рассчёт расстояния  </StyledH1Sync>
+                <SelectService onChange={(e) => {
+                    setSelectedService(e.target.value);
                 }}
-            >
-                <option value="">Выберите станцию</option>
+                               services={services}
+                               selectedService={selectedService}
+                />
+
+            </StyledGrayWrapper>
+
+
+            <StyledDataTimeInput
+                list="stationListDist"
+                value={selectedStations}
+                onChange={(e) => setSelectedStations(e.target.value)}
+                id = "inputDisA"
+                placeholder="Выберите или введите станцию"
+
+            />
+            <datalist id="stationListDist">
                 {stations.map((station, index) => (
-                    <option key={index} value={station}>{station}</option>
+                    <option key={index} value={station} />
                 ))}
-            </StyledSelectService>
-            <StyledP>Введите долготу</StyledP>
-            <StyledInputDistance onChange={changeLongitude} placeholder={"Введите долготу"}/>
-            <StyledP>Введите широту</StyledP>
-            <StyledInputDistance onChange={changeLatitude} placeholder={"Введите широту"}/>
+            </datalist>
+            <StyledInputDistance type = "number" onChange={changeLongitude} placeholder={"Введите долготу"}/>
+            <StyledInputDistance type = "number" onChange={changeLatitude} placeholder={"Введите широту"}/>
 
             <StyledButtonAsyncBigger onClick={showResultDistance}> Получить данные</StyledButtonAsyncBigger>
 
            <StyledDistanceDiv>
-               <StyledP>Расстояние в километрах: {kilometrsDist} </StyledP>
-               <StyledP>Расстояние в градусах: {degreesDist} </StyledP>
+
                 <iframe src={iframeUrl} width="300px" height="400px"/>
+               <StyledP><strong>Расстояние:</strong> {kilometrsDist} км | {degreesDist}°</StyledP>
             </StyledDistanceDiv>
         </StyledDistancePage>
     );

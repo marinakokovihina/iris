@@ -5,7 +5,7 @@ import Header from "./Header";
 const Footer = () => {
     return (
         <StyledFooter>
-            <p>Выполнил Дондоков Гунга, группа Б20-603.</p>
+            <p>Выполнил Дондоков Г.Б., группа Б20-603.</p>
         </StyledFooter>
     );
 };

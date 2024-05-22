@@ -49,7 +49,6 @@ export const StyledButtonAsync = styled.button `
 export const AsyncH1 = styled.h1 `
   font-size: 25px;
   color: #3d3d3d;
-  
 `
 
 export const SelectTimeStyled = styled.select `
@@ -60,6 +59,7 @@ export const SelectTimeDivStyled = styled.div `
 
 export const StyledButtonAsyncBigger = styled.button `
   min-width: 300px;
+  min-height: 40px;
   font-family: Helvetica, -apple-system, sans-serif;
   font-size: 16px;
   color: white;
@@ -75,7 +75,9 @@ export const StyledButtonAsyncBigger = styled.button `
     transition: 0.2s;
   }
 `
-
+const StyledDivImgData = styled.div `
+  align-items: center;
+`
 export const StyledIframe = styled.iframe `
   
 `
@@ -87,12 +89,12 @@ export const StyledTimerAsync = styled.div `
 
 export const StyledTimerAsyncContainer = styled.div `
   margin-right: 7px;
-  margin-top: 10px;
+  margin-top: 12px;
   text-align: center;
   font-size: 19px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
     input {
-      margin-top: 2px ;
+      margin-top: 5px ;
       font-size: 18px;
       max-height: 20px;
       max-width: 50px;
@@ -102,26 +104,31 @@ export const StyledTimerAsyncContainer = styled.div `
     }
 `
 
-export const StyledTable = styled.table `
-    margin-top: 20px;
-    border-spacing: 0;
-   border-radius: 10px;
-    max-width: 90%;
-  min-width: 90%;
-   border-collapse: collapse;
-  color: #3d3d3d;
-    text-align: center;
+
+
+export const PConnectionStyled = styled.p `
+  margin: 0px 0px 10px 0px;
+  text-align: center;
+  font-size: 14px;
   
-  th{
-    padding: 8px;
-    border: 0.2px solid #3d3d3d;
-
-  }
-  tr {
-    border: 0.2px solid #3d3d3d;
-  }
-  td{
-    padding: 8px;
-  }
-
+`
+export const PConnection = styled.p `
+  font-weight: bolder;
+  margin: 0px 0px 10px 0px;
+  text-align: center;
+  font-size: 16px;
+`
+export const StyledGrayWrapper = styled.div `
+  background-color: rgba(0, 0, 0, 0.03);
+  min-width: 100%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  border-bottom-width: 1px;
+  border: solid rgba(0, 0, 0, 0.17);
+  border-top-width: 0;
+  border-right-width: 0;
+  border-left-width: 0;
 `

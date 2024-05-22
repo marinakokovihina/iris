@@ -3,7 +3,7 @@ import axios from "axios";
 import {SelectService} from "../components/SelectService";
 import {divideString} from "../store/store";
 import {
-    imgContainerStyled,
+    ImgContainerStyled, ImgStyled,
     StyledDataTimeInput,
     StyledH1Sync,
     StyledIframeSync,
@@ -12,12 +12,13 @@ import {
     StyledSyncMain
 } from "../components/styles/StyledSync";
 import {
+    PConnectionStyled,
     StyledButtonAsync,
-    StyledButtonAsyncBigger,
+    StyledButtonAsyncBigger, StyledGrayWrapper,
     StyledSelectService,
     StyledTextSync
 } from "../components/styles/StyledAsync";
-
+import imgNoData from "../assets/degree.png"
 export const SyncSelect = () => {
     const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState('');
@@ -42,6 +43,7 @@ export const SyncSelect = () => {
                         'Content-Type': 'application/json'
                     },
                 });
+
             console.log(response.data + "response data");
             const stationList = await Promise.all(response.data.data.map(async (item) => {
                 return `${item.network}/${item.station}`;
@@ -52,7 +54,7 @@ export const SyncSelect = () => {
             setStations(stationList)
             console.log(stations)
         } catch (error) {
-            console.error('Ошибка при загрузке данных станций:', error);
+            console.error('Ошибка при загрузке данных станций:', error)
         }
     };
     useEffect(() => {
@@ -64,9 +66,9 @@ export const SyncSelect = () => {
                     }
                 });
 
-                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap,  hasDist: item.has_supported_dist }));
+                const serv = response.data.data.map((item, index) => ({id: index, name: item.name, hasSup: item.has_supported_scrap, hasDist: item.has_supported_dist, port: item.connection.port, host: item.connection.host}));
                 const filteredServ = serv.filter(item => item.hasSup === true);
-                console.log(filteredServ);
+                console.log(serv);
                 setServices(filteredServ)
 
             } catch (error) {
@@ -97,7 +99,10 @@ export const SyncSelect = () => {
                 img = document.createElement('img');
                 containerImage.appendChild(img);
             }
-
+            var delElP = document.getElementById('noDataSyncSelect');
+            var delElImg = document.getElementById('noDataImg')
+            delElP.remove();
+            delElImg.remove();
             img.src = `data:image/jpeg;base64,${pict}`;
             img.width="400";
             img.height="400";
@@ -135,11 +140,7 @@ export const SyncSelect = () => {
         console.log("Month: ", secondMonthValue);
         console.log("Hour: ", secondHourValue);
         console.log("Minute: ", secondMinValue);
-        // let firstDayValue = document.getElementById('firstDay').value;
-        // let firstMonthValue = document.getElementById('firstMonth').value;
-        // let firstHourValue = document.getElementById('firstHour').value;
-        // let firstMinValue = document.getElementById('firstMinute').value;
-        // let firstSecValue = '01'
+
 
         if (!firstDayValue || !firstMonthValue || !secondDayValue || !secondMonthValue  || !firstSecValue   || !secondSecValue) {
             alert("Введите все значения");
@@ -194,91 +195,70 @@ export const SyncSelect = () => {
     }, [selectedService]);
     return (
         <StyledSyncMain>
+            <StyledGrayWrapper>
+                <StyledH1Sync> Интервал времени </StyledH1Sync>
+                <SelectService onChange={(e) => setSelectedService(e.target.value)}
+                               services={services}
+                               selectedService={selectedService}
 
-            <StyledH1Sync> Интервал времени </StyledH1Sync>
+                />
+            </StyledGrayWrapper>
+
+            <StyledDataTimeInput
+                list="stationListForSyncSelect"
+                value={selectedStations}
+                onChange={(e) => setSelectedStations(e.target.value)}
+                id = "inputDisA"
+                placeholder="Выберите или введите станцию"
+
+            />
+            <datalist id="stationListForSyncSelect">
+                {stations.map((station, index) => (
+                    <option key={index} value={station} />
+                ))}
+            </datalist>
+
+
+
 
 
             <StyledDataTimeInput
                 type={"datetime-local"}
                 id="startDate"
                 name="startDate"
-                onChange={() => {
-                    const startDateInput = document.getElementById("startDate");
-                    const startDate = new Date(startDateInput.value);
-
-                    const selectedDay = startDate.getDate();
-                    const selectedMonth = startDate.getMonth() + 1;
-                    const selectedYear = startDate.getFullYear();
-                    const selectedHour = startDate.getHours();
-                    const selectedMinute = startDate.getMinutes();
-
-                    console.log("Day: ", selectedDay);
-                    console.log("Month: ", selectedMonth);
-                    console.log("Year: ", selectedYear);
-                    console.log("Hour: ", selectedHour);
-                    console.log("Minute: ", selectedMinute);
-
-                    // const startDate = new Date(e.target.value);
-                    // const firstDay = document.getElementById("firstDay");
-                    // const firstMonth = document.getElementById("firstMonth");
-                    // const firstHour = document.getElementById("firstHour");
-                    // const firstMinute = document.getElementById("firstMinute");
-                    //
-                    // if (firstDay) firstDay.value = startDate.getDate();
-                    // if (firstMonth) firstMonth.value = startDate.getMonth() + 1;
-                    // if (firstHour) firstHour.value = startDate.getHours();
-                    // if (firstMinute) firstMinute.value = startDate.getMinutes();
-                    // console.log(firstDay,firstMonth, firstHour, firstMinute )
-                }}
             />
             <StyledDataTimeInput
                 type={"datetime-local"}
                 id="endDate"
                 name="endDate"
-                onChange={(e) => {
 
-                    // const endDate = new Date(e.target.value);
-                    // const secondDay = document.getElementById("secondDay");
-                    // const secondMonth = document.getElementById("secondMonth");
-                    // const secondHour = document.getElementById("secondHour");
-                    // const secondMinute = document.getElementById("secondMinute");
-                    //
-                    // if (secondDay) secondDay.value = endDate.getDate();
-                    // if (secondMonth) secondMonth.value = endDate.getMonth() + 1;
-                    // if (secondHour) secondHour.value = endDate.getHours();
-                    // if (secondMinute) secondMinute.value = endDate.getMinutes();
-                    // console.log(secondDay, secondMonth, secondHour, secondMinute)
-                }}
             />
 
-            <SelectService onChange={(e) => setSelectedService(e.target.value)}
-                           services={services}
-                           selectedService={selectedService}
-            />
 
-                <StyledSelectService
-                    value={selectedStations}
-                    onChange={(e) => setSelectedStations(e.target.value)}
-                >
-                    <option value="">Выберите станцию</option>
-                    {stations.map((station, index) => (
-                        <option key={index} value={station}>{station}</option>
-                    ))}
-                </StyledSelectService>
-            <br/>
+
+
             <StyledButtonAsyncBigger onClick={sendReq}>Получить данные</StyledButtonAsyncBigger>
 
             {/*Временные ворота задавать (не просто день, но и время,
             пример: 2010-02-27T06:30:00, где 2010 - год, 02- месяц, 27 - число,
              06 - час, 30 - минуты, 00 - секунды, время задается в UTC)*/}
             <StyledResultSync>
-                <imgContainerStyled id="imgContainer">
+                <ImgContainerStyled >
+                    <img id = "noDataImg" src={imgNoData} style={{height: 40 + 'px', width: 40 + "px"}}/>
+                    <ImgStyled id = "imgContainer">
+                    </ImgStyled>
+                    <PConnectionStyled id = "noDataSyncSelect"> <p> <b>Нет данных для построения<br/> волновой формы</b> </p>
 
-                </imgContainerStyled>
+                        <p>Укажите параметры для скачивания <br/>сейсмоданных</p> </PConnectionStyled>
+
+                </ImgContainerStyled>
                 <StyledIframeSync
                     id="iframeForSync"
+                    srcdoc="<p>Данных нет</p>"
+
                     width="400"
-                    height="60"
+                    height="70"
+
                 >
                 </StyledIframeSync>
             </StyledResultSync>

@@ -55,12 +55,22 @@ export const StyledResultSync = styled.div `
   margin-bottom: 10px;
   margin-top: 10px;
 `
-export const imgContainerStyled = styled.div `
-  
+export const ImgContainerStyled = styled.div `
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   img {
-    max-width: 100px;
-    height: 300px;
+    
     
   }
   
+`
+export const ImgStyled = styled.div `
+  align-items: center;
+  img{ 
+    min-height: 400px;
+    min-width: 350px;
+  }
+
 `

@@ -4,12 +4,19 @@ import {SelectTime} from "../components/SelectTime";
 import {divideString, hours, minutes, seconds, sendGetRequest} from "../store/store";
 import axios from "axios";
 import {
-    AsyncH1, AsyncWrapper, StyledAsync, StyledButtonAsync, StyledButtonAsyncBigger,
-    StyledButtonSync, StyledIframe,
+    AsyncH1, AsyncWrapper, PConnection, PConnectionStyled, StyledAsync, StyledButtonAsync, StyledButtonAsyncBigger,
+    StyledButtonSync, StyledDataList, StyledGrayWrapper, StyledIframe,
     StyledSelectService,
     StyledSync, StyledSyncSelectServices, StyledTable,
     StyledTextSync, StyledTimerAsync, StyledTimerAsyncContainer
 } from "../components/styles/StyledAsync";
+import {
+    ImgContainerStyled, ImgStyled,
+    StyledDataTimeInput,
+    StyledIframeSync,
+    StyledResultSync
+} from "../components/styles/StyledSync";
+import imgNoData from "../assets/degree.png"
 
 const AsyncSelect = () => {
 
@@ -20,17 +27,8 @@ const AsyncSelect = () => {
     const [selectedSecond, setSelectedSecond] = useState('');
     const [selectedMinute, setSelectedMinute] = useState('');
     const [selectedHour, setSelectedHour] = useState('');
-
-    const handleHourChange = (event) => {
-        setSelectedHour(event.target.value);
-    };
-
-    const handleMinuteChange = (event) => {
-        setSelectedMinute(event.target.value);
-    };
-    const handleSecondChange = (event) => {
-        setSelectedSecond(event.target.value);
-    };
+    const [port, setPort] = useState('');
+    const [host, setHost] = useState('');
     useEffect(() => {
         const fetchServices = async () => {
             try {
@@ -42,8 +40,11 @@ const AsyncSelect = () => {
 
                 console.log(response.data);
 
-                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap, hasDist: item.has_supported_dist }));
+                const serv = response.data.data.map((item, index) => ({ id: index,   name: item.name, hasSup: item.has_supported_scrap, hasDist: item.has_supported_dist, host: item.connection.host, port: item.connection.port }));
                 setServices(serv);
+
+
+
             } catch (error) {
                 console.error('Произошла ошибка запроса:', error);
             }
@@ -51,6 +52,29 @@ const AsyncSelect = () => {
 
         fetchServices();
     }, []);
+    useEffect(() => {
+        if (selectedService) {
+            clickBtnShowStations();
+        }
+    }, [selectedService]);
+    useEffect(() => {
+        const selectedServiceInfo = services.find((service) => service.name === selectedService);
+        if (selectedServiceInfo) {
+            const { host, port } = selectedServiceInfo;
+            setTextConnection(`Подключение: ${host}:${port}`);
+        }
+    }, [services, selectedService])
+
+    const handleHourChange = (event) => {
+        setSelectedHour(event.target.value);
+    };
+
+    const handleMinuteChange = (event) => {
+        setSelectedMinute(event.target.value);
+    };
+    const handleSecondChange = (event) => {
+        setSelectedSecond(event.target.value);
+    };
 
     const clickBtnShowStations = async () => {
         try {
@@ -69,6 +93,10 @@ const AsyncSelect = () => {
             setStations(stationList);
             setStations(stationList)
             console.log(stations)
+            const myElement = document.getElementById('inputDisA');
+            myElement.disabled = false;
+            myElement.value = '';
+            setSelectedStations(myElement.value);
         } catch (error) {
             console.error('Ошибка при загрузке данных станций:', error);
         }
@@ -106,10 +134,10 @@ const AsyncSelect = () => {
         }
     };
 
+    let urlFile = '';
+    let urlImg = '';
     async function sendGetRequest(taskId, timeToRequest) {
         let responseValue = '';
-        let linkList = [];
-
         while (responseValue !== 'finished') {
             try {
                 const response = await axios.get(`https://geoscope-vniia.ru/api/v1/async_loader`, {
@@ -122,12 +150,13 @@ const AsyncSelect = () => {
                 });
                 responseValue = response.data.data.status;
                 console.log(responseValue)
-                if (response.data.data.files) {
-                    linkList = linkList.concat(response.data.data.files);
+                if (response.data.data.result.file) {
+                    urlFile = response.data.data.result.file;
+                    urlImg = response.data.data.result.waveform_data;
                 }
 
                 if (responseValue === 'finished') {
-                    showLinks(linkList);
+                    showLinks();
                 }
             } catch (error) {
                 console.error('Произошла ошибка запроса:', error.message);
@@ -136,56 +165,74 @@ const AsyncSelect = () => {
         }
 
         console.log('Значение изменилось на "finished".');
-        return linkList;
     }
-    useEffect(() => {
-        if (selectedService) {
-            clickBtnShowStations();
+    const showLinks = () => {
+        if (urlFile.length > 0) {
+            const iframe = document.getElementById('iframeForSyncA');
+            const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDocument.body.innerHTML = `<a href="${urlFile}">${urlFile}</a>`;
+
+        } else {
+            console.log('Нет данных для отображения');
         }
-    }, [selectedService]);
-    const showLinks = (linkList) => {
 
-        var table = document.getElementById('TableForLinks');
-        table.innerHTML = '';
-        var header = table.createTHead();
-        var row = header.insertRow(0);
-        var idCell = row.insertCell(0);
-        var linkCell = row.insertCell(1);
-        idCell.textContent = 'ID ссылки';
-        linkCell.textContent = 'Ссылка';
-        linkList.forEach((item, index) => {
-            var newRow = table.insertRow();
-            var newIdCell = newRow.insertCell(0);
-            var newLinkCell = newRow.insertCell(1);
-            newIdCell.textContent = index + 1; // Индекс + 1 как ID
-            newLinkCell.innerHTML = `<a href="${item}" target="_blank">${item}</a>`;});
+        if (urlImg.length > 0) {
+            const containerImage = document.getElementById('imgContainerA');
+            let img = containerImage.querySelector('img');
 
+            if (!img) {
+
+                img = document.createElement('img');
+                containerImage.appendChild(img);
+            }
+
+            var delElA = document.getElementById('noDataAsyncSelect');
+            delElA.remove();
+            var delElImg = document.getElementById('noDataImgAsync')
+            delElImg.remove();
+            img.src = `data:image/jpeg;base64,${urlImg}`;
+            img.width="400";
+            img.height="400";
+
+        }
 
     }
 
+
+
+    const [textConnection, setTextConnection] = useState("Подключениe не установлено");
     return (
         <StyledAsync>
+            <StyledGrayWrapper>
             <AsyncH1> Непрерывные данные </AsyncH1>
-            <StyledSyncSelectServices>
                 <SelectService onChange={(e) => {
                     setSelectedService(e.target.value);
+                    const myElement = document.getElementById('inputDisA');
+                    myElement.disabled = true;
+                    myElement.value = '';
+                    setSelectedStations(myElement.value);
+
+
                 }}
                                services={services}
                                selectedService={selectedService}
                 />
-                <StyledSelectService
-                    value={selectedStations}
-                    onChange={(e) => {
-                        setSelectedStations(e.target.value)
 
-                    }}
-                >
-                    <option disabled value="">Выберите станцию</option>
+            </StyledGrayWrapper>
+            <PConnection >{textConnection}</PConnection>
+                <StyledDataTimeInput
+                    list="stationList"
+                    value={selectedStations}
+                    onChange={(e) => setSelectedStations(e.target.value)}
+                    id = "inputDisA"
+                    placeholder="Выберите или введите станцию"
+
+                />
+                <datalist id="stationList">
                     {stations.map((station, index) => (
-                        <option key={index} value={station}>{station}</option>
+                        <option key={index} value={station} />
                     ))}
-                </StyledSelectService>
-            </StyledSyncSelectServices>
+                </datalist>
 
 
 
@@ -204,22 +251,24 @@ const AsyncSelect = () => {
                 </StyledTimerAsyncContainer>
             </StyledTimerAsync>
             <StyledButtonAsyncBigger onClick={clickBtnShowResult}> Начать загрузку данных </StyledButtonAsyncBigger>
+            <StyledResultSync>
+                <ImgContainerStyled>
+                    <img id = "noDataImgAsync"src={imgNoData} style={{height: 40 + 'px', width: 40 + "px"}}/>
+                    <ImgStyled id = "imgContainerA">
 
-            <StyledTable id="TableForLinks">
-                <thead>
-                <tr>
-                    <th>
-                        №
-                    </th>
-                    <th>
-                        Ссылка на скачивание
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr> <td></td><td> Данных нет </td> </tr>
-                </tbody>
-            </StyledTable>
+                    </ImgStyled>
+                    <PConnectionStyled id = "noDataAsyncSelect"> <p> <b>Нет данных для построения <br/> волновой формы</b> </p>
+
+                        <p>Укажите параметры для скачивания<br/> сейсмоданных</p> </PConnectionStyled>
+                </ImgContainerStyled>
+                <StyledIframeSync
+                    srcdoc="<p>Данных нет</p>"
+                    id="iframeForSyncA"
+                    width="400"
+                    height="70"
+                >
+                </StyledIframeSync>
+            </StyledResultSync>
 
 
         </StyledAsync>
