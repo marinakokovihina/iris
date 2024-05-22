@@ -32,7 +32,7 @@ const AsyncSelect = () => {
     useEffect(() => {
         const fetchServices = async () => {
             try {
-                const response = await axios.get('https://geoscope-vniia.ru/api/v1/services', {
+                const response = await axios.get('https://geo-scope.ru/api/v1/services', {
                     headers: {
                         'ngrok-skip-browser-warning': '69420'
                     }
@@ -79,7 +79,7 @@ const AsyncSelect = () => {
     const clickBtnShowStations = async () => {
         try {
             console.log(selectedService)
-            const response = await axios.get(`https://geoscope-vniia.ru/api/v1/streams?service_name=${selectedService}`,
+            const response = await axios.get(`https://geo-scope.ru/api/v1/streams?service_name=${selectedService}`,
              {
                 headers: {
                     'ngrok-skip-browser-warning': '69420',
@@ -116,7 +116,7 @@ const AsyncSelect = () => {
                 alert('Выберите время! А то я Вам ничего не покажу!');
             } else {
                 const { network, station } = divideString(selectedStations);
-                const response = await axios.post(`https://geoscope-vniia.ru/api/v1/async_loader`, {
+                const response = await axios.post(`https://geo-scope.ru/api/v1/async_loader`, {
                     'service_name': selectedService,
                     'network': network,
                     'station': station,
@@ -140,7 +140,7 @@ const AsyncSelect = () => {
         let responseValue = '';
         while (responseValue !== 'finished') {
             try {
-                const response = await axios.get(`https://geoscope-vniia.ru/api/v1/async_loader`, {
+                const response = await axios.get(`https://geo-scope.ru/api/v1/async_loader`, {
                     headers: {
                         'ngrok-skip-browser-warning': '69420',
                     },

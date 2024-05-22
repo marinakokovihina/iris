@@ -26,7 +26,7 @@ const GetDistance = () => {
     useEffect(() => {
         const fetchServices = async () => {
             try {
-                const response = await axios.get('https://geoscope-vniia.ru/api/v1/services', {
+                const response = await axios.get('https://geo-scope.ru/api/v1/services', {
                     headers: {
                         'ngrok-skip-browser-warning': '69420'
                     }
@@ -69,7 +69,7 @@ const GetDistance = () => {
                 alert("Введите данные координаты")
             }
             else {
-                const response = await axios.post(`https://geoscope-vniia.ru/api/v1/destination`, {
+                const response = await axios.post(`https://geo-scope.ru/api/v1/destination`, {
                     'service_name': selectedService,
                     'network': network,
                     'station': station,
@@ -100,7 +100,7 @@ const GetDistance = () => {
     const clickBtnShowStations = async () => {
         try {
             console.log(selectedService)
-            const response = await axios.get(`https://geoscope-vniia.ru/api/v1/streams?service_name=${selectedService}`,
+            const response = await axios.get(`https://geo-scope.ru/api/v1/streams?service_name=${selectedService}`,
                 {
                     headers: {
                         'ngrok-skip-browser-warning': '69420',
