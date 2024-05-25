@@ -69,7 +69,7 @@ const GetDistance = () => {
                 alert("Введите данные координаты")
             }
             else {
-                const response = await axios.post(`https://geo-scope.ru/api/v1/destination`, {
+                const response = await axios.post(`https://geo-scope.ru/api/v1/station_destination`, {
                     'service_name': selectedService,
                     'network': network,
                     'station': station,

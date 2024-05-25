@@ -239,9 +239,6 @@ export const SyncSelect = () => {
 
             <StyledButtonAsyncBigger onClick={sendReq}>Получить данные</StyledButtonAsyncBigger>
 
-            {/*Временные ворота задавать (не просто день, но и время,
-            пример: 2010-02-27T06:30:00, где 2010 - год, 02- месяц, 27 - число,
-             06 - час, 30 - минуты, 00 - секунды, время задается в UTC)*/}
             <StyledResultSync>
                 <ImgContainerStyled >
                     <img id = "noDataImg" src={imgNoData} style={{height: 40 + 'px', width: 40 + "px"}}/>

@@ -14,7 +14,6 @@ export const MainPage = () => {
         <MainWrapper>
             <Header/>
             <MainPageStyle>
-
                 <AsyncSelect/>
                 <SyncSelect/>
                 <GetDistance/>
